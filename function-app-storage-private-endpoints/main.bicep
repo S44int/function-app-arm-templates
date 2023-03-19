@@ -10,8 +10,9 @@ param location string = resourceGroup().location
   'node'
   'python'
   'java'
+  'powershell'
 ])
-param functionWorkerRuntime string = 'node'
+param functionWorkerRuntime string = 'powershell'
 
 @description('Specifies the OS used for the Azure Function hosting plan.')
 @allowed([
