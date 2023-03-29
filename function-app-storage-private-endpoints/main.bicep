@@ -67,6 +67,8 @@ var privateStorageQueueDnsZoneName = 'privatelink.queue.${environment().suffixes
 var privateEndpointStorageQueueName = '${functionStorageAccountName}-queue-private-endpoint'
 var functionContentShareName = 'function-content-share'
 var isReserved = ((functionPlanOS == 'Linux') ? true : false)
+var repoURL = 'https://tiborszucs@dev.azure.com/tiborszucs/TestEnv/_git/Functions'
+var branch = 'master'
 
 resource vnet 'Microsoft.Network/virtualNetworks@2022-05-01' = {
   name: vnetName
@@ -440,6 +442,15 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
     privateStorageQueueDnsZoneLink
     privateEndpointStorageQueuePrivateDnsZoneGroup
   ]
+}
+
+resource functionAppName_web 'Microsoft.Web/sites/sourcecontrols@2018-11-01' = {
+  parent: functionApp
+  name: 'web'
+  properties: {
+    repoUrl: repoURL
+    branch: branch
+  }
 }
 
 resource networkConfig 'Microsoft.Web/sites/networkConfig@2022-03-01' = {
