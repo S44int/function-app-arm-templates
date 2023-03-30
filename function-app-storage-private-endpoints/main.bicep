@@ -464,3 +464,5 @@ resource networkConfig 'Microsoft.Web/sites/networkConfig@2022-03-01' = {
     vnet
   ]
 }
+
+output functionAppName string = functionAppName
