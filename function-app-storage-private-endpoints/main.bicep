@@ -465,4 +465,4 @@ resource networkConfig 'Microsoft.Web/sites/networkConfig@2022-03-01' = {
   ]
 }
 
-output functionAppName string = functionAppName
+output outFunctionAppName string = functionAppName
