@@ -1,6 +1,9 @@
 @description('The name of the Azure Function app.')
 param functionAppName string = 'func-${uniqueString(resourceGroup().id)}'
 
+@description('The name of the Azure Key Vault.')
+param keyVaultName string = 'kv-${uniqueString(resourceGroup().id)}'
+
 @description('The location into which the resources should be deployed.')
 param location string = resourceGroup().location
 
@@ -385,6 +388,9 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
   name: functionAppName
   location: location
   kind: (isReserved ? 'functionapp,linux' : 'functionapp')
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     reserved: isReserved
     serverFarmId: functionAppPlan.id
@@ -463,6 +469,30 @@ resource networkConfig 'Microsoft.Web/sites/networkConfig@2022-03-01' = {
   dependsOn: [
     vnet
   ]
+}
+
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+  name: keyVaultName
+  location: location
+  properties: {
+    accessPolicies: [
+      {
+        objectId: functionApp.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+          ]
+        }
+        tenantId: subscription().tenantId
+      }
+    ]
+    enabledForTemplateDeployment: true
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId:  subscription().tenantId
+  }
 }
 
 output outFunctionAppName string = functionAppName
