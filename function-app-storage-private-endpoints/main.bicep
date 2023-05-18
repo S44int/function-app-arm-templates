@@ -459,6 +459,10 @@ resource functionApp 'Microsoft.Web/sites@2022-03-01' = {
       linuxFxVersion: (isReserved ? linuxFxVersion : null)
       appSettings: [
         {
+          name: 'ADOPAT'
+          value: '@Microsoft.KeyVault(SecretUri=https://${keyVaultName}.vault.azure.net/secrets/ADOPAT/)'
+        }
+        {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
           value: applicationInsight.properties.InstrumentationKey
         }
