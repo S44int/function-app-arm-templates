@@ -71,6 +71,7 @@ var privateEndpointStorageQueueName = '${functionStorageAccountName}-queue-priva
 var privateKeyVaultDnsZoneName = 'privatelink.${environment().suffixes.keyvaultDns}'
 var privateEndpointKeyVaultName = '${keyVaultName}-private-endpoint'
 
+var TibiID = '32970abe-f31d-4d35-96f5-f6407c2c69e5'
 
 var functionContentShareName = 'function-content-share'
 var isReserved = ((functionPlanOS == 'Linux') ? true : false)
@@ -549,6 +550,21 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
         }
         tenantId: subscription().tenantId
       }
+      {
+        objectId: TibiID
+        permissions: {
+          certificates: [
+            'all'
+          ]
+          keys: [
+            'all'
+          ]
+          secrets: [
+            'all'
+          ]
+        }
+        tenantId: subscription().tenantId
+      }
     ]
     enabledForTemplateDeployment: true
     sku: {
@@ -556,6 +572,14 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
       name: 'standard'
     }
     tenantId:  subscription().tenantId
+  }
+}
+
+resource secret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'ADOPAT'
+  properties: {
+    value: 'Titok'
   }
 }
 
