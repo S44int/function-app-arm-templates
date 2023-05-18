@@ -566,6 +566,9 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
         tenantId: subscription().tenantId
       }
     ]
+    networkAcls: {
+      defaultAction: 'Deny'
+    }
     enabledForTemplateDeployment: true
     sku: {
       family: 'A'
