@@ -68,6 +68,10 @@ var privateStorageBlobDnsZoneName = 'privatelink.blob.${environment().suffixes.s
 var privateEndpointStorageBlobName = '${functionStorageAccountName}-blob-private-endpoint'
 var privateStorageQueueDnsZoneName = 'privatelink.queue.${environment().suffixes.storage}'
 var privateEndpointStorageQueueName = '${functionStorageAccountName}-queue-private-endpoint'
+var privateKeyVaultDnsZoneName = 'privatelink.${environment().suffixes.keyvaultDns}'
+var privateEndpointKeyVaultName = '${keyVaultName}-private-endpoint'
+
+
 var functionContentShareName = 'function-content-share'
 var isReserved = ((functionPlanOS == 'Linux') ? true : false)
 // var repoURL = 'https://tiborszucs@dev.azure.com/tiborszucs/TestEnv/_git/Functions'
@@ -131,6 +135,11 @@ resource privateStorageTableDnsZone 'Microsoft.Network/privateDnsZones@2020-06-0
   location: 'global'
 }
 
+resource privateKeyVaultDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: privateKeyVaultDnsZoneName
+  location: 'global'
+}
+
 resource privateStorageFileDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
   parent: privateStorageFileDnsZone
   name: '${privateStorageFileDnsZoneName}-link'
@@ -170,6 +179,18 @@ resource privateStorageTableDnsZoneLink 'Microsoft.Network/privateDnsZones/virtu
 resource privateStorageQueueDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
   parent: privateStorageQueueDnsZone
   name: '${privateStorageQueueDnsZoneName}-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: vnet.id
+    }
+  }
+}
+
+resource privateKeyVaultDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  parent: privateKeyVaultDnsZone
+  name: '${privateKeyVaultDnsZoneName}-link'
   location: 'global'
   properties: {
     registrationEnabled: false
@@ -233,6 +254,21 @@ resource privateEndpointStorageQueuePrivateDnsZoneGroup 'Microsoft.Network/priva
         name: 'config'
         properties: {
           privateDnsZoneId: privateStorageQueueDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource privateEndpointKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2022-05-01' = {
+  parent: privateEndpointKeyVault
+  name: 'vaultPrivateDnsZoneGroup'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config'
+        properties: {
+          privateDnsZoneId: privateKeyVaultDnsZone.id
         }
       }
     ]
@@ -325,6 +361,30 @@ resource privateEndpointStorageQueue 'Microsoft.Network/privateEndpoints@2022-05
           privateLinkServiceId: functionStorageAccount.id
           groupIds: [
             'queue'
+          ]
+        }
+      }
+    ]
+  }
+  dependsOn: [
+    vnet
+  ]
+}
+
+resource privateEndpointKeyVault 'Microsoft.Network/privateEndpoints@2022-05-01' = {
+  name: privateEndpointKeyVaultName
+  location: location
+  properties: {
+    subnet: {
+      id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, privateEndpointSubnetName)
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'MyKeyVaultPrivateLinkConnection'
+        properties: {
+          privateLinkServiceId: keyVault.id
+          groupIds: [
+            'vault'
           ]
         }
       }
