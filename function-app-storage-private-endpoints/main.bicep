@@ -68,7 +68,7 @@ var privateStorageBlobDnsZoneName = 'privatelink.blob.${environment().suffixes.s
 var privateEndpointStorageBlobName = '${functionStorageAccountName}-blob-private-endpoint'
 var privateStorageQueueDnsZoneName = 'privatelink.queue.${environment().suffixes.storage}'
 var privateEndpointStorageQueueName = '${functionStorageAccountName}-queue-private-endpoint'
-var privateKeyVaultDnsZoneName = 'privatelink.${environment().suffixes.keyvaultDns}'
+var privateKeyVaultDnsZoneName = 'privatelink.vaultcore.azure.net'
 var privateEndpointKeyVaultName = '${keyVaultName}-private-endpoint'
 
 var TibiID = '32970abe-f31d-4d35-96f5-f6407c2c69e5'
