@@ -70,6 +70,8 @@ var privateStorageQueueDnsZoneName = 'privatelink.queue.${environment().suffixes
 var privateEndpointStorageQueueName = '${functionStorageAccountName}-queue-private-endpoint'
 var privateKeyVaultDnsZoneName = 'privatelink.vaultcore.azure.net'
 var privateEndpointKeyVaultName = '${keyVaultName}-private-endpoint'
+var privateFunctionAppDnsZoneName = 'privatelink.azurewebsites.net'
+var privateEndpointFunctionAppName = '${functionAppName}-private-endpoint'
 
 var TibiID = '32970abe-f31d-4d35-96f5-f6407c2c69e5'
 
@@ -141,6 +143,11 @@ resource privateKeyVaultDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' =
   location: 'global'
 }
 
+resource privateFunctionAppDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: privateFunctionAppDnsZoneName
+  location: 'global'
+}
+
 resource privateStorageFileDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
   parent: privateStorageFileDnsZone
   name: '${privateStorageFileDnsZoneName}-link'
@@ -192,6 +199,18 @@ resource privateStorageQueueDnsZoneLink 'Microsoft.Network/privateDnsZones/virtu
 resource privateKeyVaultDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
   parent: privateKeyVaultDnsZone
   name: '${privateKeyVaultDnsZoneName}-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: vnet.id
+    }
+  }
+}
+
+resource privateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  parent: privateFunctionAppDnsZone
+  name: '${privateFunctionAppDnsZoneName}-link'
   location: 'global'
   properties: {
     registrationEnabled: false
@@ -270,6 +289,21 @@ resource privateEndpointKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEn
         name: 'config'
         properties: {
           privateDnsZoneId: privateKeyVaultDnsZone.id
+        }
+      }
+    ]
+  }
+}
+
+resource privateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2022-05-01' = {
+  parent: privateEndpoint
+  name: 'funcPrivateDnsZoneGroup'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config'
+        properties: {
+          privateDnsZoneId: privateFunctionAppDnsZone.id
         }
       }
     ]
@@ -386,6 +420,30 @@ resource privateEndpointKeyVault 'Microsoft.Network/privateEndpoints@2022-05-01'
           privateLinkServiceId: keyVault.id
           groupIds: [
             'vault'
+          ]
+        }
+      }
+    ]
+  }
+  dependsOn: [
+    vnet
+  ]
+}
+
+resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-05-01' = {
+  name: privateEndpointFunctionAppName
+  location: location
+  properties: {
+    subnet: {
+      id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, privateEndpointSubnetName)
+    }
+    privateLinkServiceConnections: [
+      {
+        name: 'MyFunctionAppPrivateLinkConnection'
+        properties: {
+          privateLinkServiceId: functionApp.id
+          groupIds: [
+            'sites'
           ]
         }
       }
