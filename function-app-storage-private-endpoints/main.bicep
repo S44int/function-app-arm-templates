@@ -645,4 +645,12 @@ resource secret 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
   }
 }
 
+resource secret2 'Microsoft.KeyVault/vaults/secrets@2021-11-01-preview' = {
+  parent: keyVault
+  name: 'TestyTest'
+  properties: {
+    value: 'Oh! Not my testies!'
+  }
+}
+
 output outFunctionAppName string = functionAppName
