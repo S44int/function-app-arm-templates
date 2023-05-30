@@ -463,7 +463,7 @@ resource functionStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' =
     name: 'Standard_LRS'
   }
   properties: {
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled'
     allowBlobPublicAccess: false
     networkAcls: {
       bypass: 'AzureServices'
@@ -636,9 +636,10 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
       }
     ]
     networkAcls: {
+      bypass: 'AzureServices'
       defaultAction: 'Deny'
     }
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled'
     enabledForTemplateDeployment: true
     sku: {
       family: 'A'
