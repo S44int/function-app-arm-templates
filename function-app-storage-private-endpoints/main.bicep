@@ -70,6 +70,7 @@ var privateStorageQueueDnsZoneName = 'privatelink.queue.${environment().suffixes
 var privateEndpointStorageQueueName = '${functionStorageAccountName}-queue-private-endpoint'
 var privateKeyVaultDnsZoneName = 'privatelink.vaultcore.azure.net'
 var privateEndpointKeyVaultName = '${keyVaultName}-private-endpoint'
+var functionAppRoleAssignmentId = '/providers/Microsoft.Authorization/roleDefinitions/0c867c2a-1d8c-454a-a3db-ab2ea1bdc8bb'
 // var privateFunctionAppDnsZoneName = 'privatelink.azurewebsites.net'
 // var privateEndpointFunctionAppName = '${functionAppName}-private-endpoint'
 
@@ -468,6 +469,16 @@ resource functionStorageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' =
       bypass: 'AzureServices'
       defaultAction: 'Deny'
     }
+  }
+}
+
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  scope: functionStorageAccount
+  name: '${functionApp.name}RoleAssignment'
+  properties: {
+    roleDefinitionId: functionAppRoleAssignmentId
+    principalId: functionApp.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
